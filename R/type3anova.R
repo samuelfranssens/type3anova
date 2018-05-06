@@ -11,9 +11,11 @@ type3anova <- function(linearmodel) {
   initial.options <- options()
   initial.options.contrasts <- initial.options$contrasts
 
+  # variables
+  variables <- all.vars(linearmodel$call) # what are the variables in our model
+  variables2 <- variables[-c(1,length(variables))] # remove first (dv) and last (data)
+
   # set contrasts for each variable
-  variables <- all.vars(linearmodel$call)
-  variables2 <- variables[-c(1,length(variables))]
   variables.list <- as.list(variables2)
   for (i in seq(length(variables.list))){
     variables.list[[i]] <- contr.sum
@@ -23,7 +25,12 @@ type3anova <- function(linearmodel) {
   # perform ANOVA
   options(contrasts=c("contr.sum", "contr.poly"))
   dt <- linearmodel$model
-  new.linearmodel <- lm(linearmodel$call, data=dt)
+  if (class(linearmodel)[1] == "lm"){ # to handle GLM
+    new.linearmodel <- lm(linearmodel$call, data=dt)
+  } else if (class(linearmodel)[1] == "glm"){
+    fam <- linearmodel$family$family
+    new.linearmodel <- glm(linearmodel$call, data=dt, family=fam)
+  }
   type3_anova <- car::Anova(new.linearmodel, contrasts=variables.list, type = 3)
 
   # reset contrast options
