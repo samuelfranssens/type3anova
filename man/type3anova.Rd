@@ -2,7 +2,8 @@
 % Please edit documentation in R/type3anova.R
 \name{type3anova}
 \alias{type3anova}
-\title{A function for Type III Anova (generates the same output as SPSS does)}
+\title{A function for Type III Anova (generates the same output as SPSS does)
+requires installation of the car and dplyr package}
 \usage{
 type3anova(linearmodel)
 }
@@ -11,6 +12,7 @@ type3anova(linearmodel)
 }
 \description{
 A function for Type III Anova (generates the same output as SPSS does)
+requires installation of the car and dplyr package
 }
 \examples{
 type3anova(lm(y ~ x1 * x2, data=dataset))

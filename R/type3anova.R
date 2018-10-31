@@ -1,4 +1,5 @@
 #' A function for Type III Anova (generates the same output as SPSS does)
+#' requires installation of the car and dplyr package
 #' @param linearmodel A linear model.
 #' @keywords type3 anova
 #' @export
@@ -33,21 +34,21 @@ type3anova <- function(linearmodel) {
   }
 
   type3_anova.temp <- car::Anova(new.linearmodel, contrasts=variables.list, type = 3)
+  type3_anova <- tibble::as_tibble(type3_anova.temp) %>%
+    dplyr::mutate(term = rownames(type3_anova.temp)) %>%
+    dplyr::rename("df1" = "Df")
 
   if (class(linearmodel)[1] == "lm"){ # to handle GLM
-
-    type3_anova <- as_tibble(type3_anova.temp) %>%
-      rename("ss" = `Sum Sq`, "df1" = "Df", "f" = "F value", "pvalue" = `Pr(>F)`) %>% # rename columns
-      mutate(term = rownames(type3_anova.temp),
-             df2 = max(summary(linearmodel)$df)) %>%
-      select(term, ss, df1, df2, f, pvalue)
+    type3_anova <- type3_anova %>%
+      dplyr::rename("ss" = `Sum Sq`, "f" = "F value", "pvalue" = `Pr(>F)`) %>% # rename columns
+      dplyr::mutate(df2 = max(summary(linearmodel)$df)) %>%
+      dplyr::select(term, ss, df1, df2, f, pvalue)
 
     } else if (class(linearmodel)[1] == "glm"){
-    type3_anova <- as_tibble(type3_anova.temp) %>%
-      rename("LR_chisq" = `LR Chisq`, "df1" = "Df", "pvalue" = `Pr(>Chisq)`) %>% # rename columns
-      mutate(term = rownames(type3_anova.temp),
-             df2 = linearmodel$df.residual) %>%
-      select(term, LR_chisq, df1, df2, pvalue)
+    type3_anova <- type3_anova %>%
+      dplyr::rename("LR_chisq" = `LR Chisq`, "pvalue" = `Pr(>Chisq)`) %>% # rename columns
+      dplyr::mutate(df2 = linearmodel$df.residual) %>%
+      dplyr::select(term, LR_chisq, df1, df2, pvalue)
     }
 
   # reset contrast options
