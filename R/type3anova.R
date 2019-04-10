@@ -8,6 +8,8 @@
 
 type3anova <- function(linearmodel) {
 
+  library(dplyr)
+
   # get initial contrast options:
   initial.options <- options()
   initial.options.contrasts <- initial.options$contrasts
@@ -50,6 +52,8 @@ type3anova <- function(linearmodel) {
       dplyr::mutate(df2 = linearmodel$df.residual) %>%
       dplyr::select(term, LR_chisq, df1, df2, pvalue)
     }
+
+  type3_anova <- type3_anova %>% mutate(pvalue = round(pvalue, 3))
 
   # reset contrast options
   options(contrasts=initial.options.contrasts)    # Set contrast coding to initial contrast options
